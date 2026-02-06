@@ -40,11 +40,11 @@ class ImageProcessor:
         self.techniques = {
             # Basic Techniques (1-8)
             'canny_edge': 'Canny Edge Detection',
-            'color_invert': 'Color Inversion',
+            'anime_style': 'Anime Animation Style',
             'sepia_tone': 'Sepia Tone',
             'pencil_sketch': 'Pencil Sketch',
             'sharpen': 'Image Sharpening',
-            'brightness_contrast': 'Brightness & Contrast',
+            'edge_detection': 'Enhanced Edge Detection',
             'binary_threshold': 'Binary Threshold',
             'emboss': 'Emboss Effect',
             
@@ -87,9 +87,62 @@ class ImageProcessor:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if len(image.shape) == 3 else image
         return cv2.Canny(gray, 30, 100)
     
-    def technique_color_invert(self, image):
-        """Technique 2: Color inversion"""
-        return cv2.bitwise_not(image)
+    def technique_anime_style(self, image):
+        """Technique 2: Anime Animation Style - Transform into anime/cartoon characters"""
+        height, width = image.shape[:2]
+        
+        # Step 1: Reduce colors using bilateral filtering and posterization
+        anime = cv2.bilateralFilter(image, 9, 100, 100)
+        
+        # Step 2: Apply strong edge detection for outline
+        gray = cv2.cvtColor(anime, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 20, 60)
+        
+        # Dilate edges to make them more prominent
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2, 2))
+        edges = cv2.dilate(edges, kernel, iterations=2)
+        
+        # Step 3: Reduce color palette (posterization)
+        # Apply k-means to reduce to 8 main colors
+        data = anime.reshape((-1, 3))
+        data = np.float32(data)
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        _, labels, centers = cv2.kmeans(data, 8, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+        centers = np.uint8(centers)
+        result = centers[labels.flatten()]
+        anime = result.reshape(image.shape)
+        
+        # Step 4: Enhance and saturate colors
+        hsv = cv2.cvtColor(anime, cv2.COLOR_BGR2HSV)
+        hsv[:,:,1] = cv2.multiply(hsv[:,:,1], 1.6)  # Boost saturation
+        hsv[:,:,1] = np.clip(hsv[:,:,1], 0, 255)
+        anime = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+        
+        # Step 5: Apply black outlines over the image
+        # Create a version with black edges
+        edges_inverted = cv2.bitwise_not(edges)
+        edges_3ch = cv2.cvtColor(edges_inverted, cv2.COLOR_GRAY2BGR)
+        
+        # Blend the image with black edges
+        anime = cv2.addWeighted(anime, 0.9, edges_3ch, 0.1, 0)
+        
+        # Step 6: Add subtle anime shading effect
+        # Create shadow areas
+        shading = cv2.GaussianBlur(gray, (25, 25), 0)
+        shading = cv2.normalize(shading, None, 0, 100, cv2.NORM_MINMAX).astype(np.uint8)
+        shading_3ch = cv2.cvtColor(shading, cv2.COLOR_GRAY2BGR)
+        
+        # Darken based on shading
+        anime = cv2.addWeighted(anime, 1.0, shading_3ch, -0.05, 0)
+        anime = np.clip(anime, 0, 255).astype(np.uint8)
+        
+        # Step 7: Add highlights (bright areas)
+        # Find bright regions for highlight effect
+        bright_mask = cv2.inRange(gray, 180, 255)
+        bright_3ch = cv2.cvtColor(bright_mask, cv2.COLOR_GRAY2BGR)
+        anime = cv2.addWeighted(anime, 1.0, bright_3ch, 0.15, 0)
+        
+        return np.clip(anime, 0, 255).astype(np.uint8)
     
     def technique_sepia_tone(self, image):
         """Technique 3: Sepia tone filter"""
@@ -114,9 +167,20 @@ class ImageProcessor:
         sharpen_kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
         return cv2.filter2D(image, -1, sharpen_kernel)
     
-    def technique_brightness_contrast(self, image, alpha=1.3, beta=40):
-        """Technique 6: Brightness/contrast adjustment"""
-        return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+    def technique_edge_detection(self, image):
+        """Technique 6: Enhanced Edge Detection"""
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+        sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        sobel = np.sqrt(sobel_x**2 + sobel_y**2)
+        sobel = np.uint8(np.clip(sobel, 0, 255))
+        laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+        laplacian = np.uint8(np.clip(np.abs(laplacian), 0, 255))
+        canny = cv2.Canny(gray, 50, 150)
+        combined = cv2.addWeighted(sobel, 0.4, laplacian, 0.3, 0)
+        combined = cv2.addWeighted(combined, 0.7, canny, 0.3, 0)
+        edges_inverted = cv2.bitwise_not(combined)
+        return cv2.cvtColor(edges_inverted, cv2.COLOR_GRAY2BGR)
     
     def technique_binary_threshold(self, image, threshold=127):
         """Technique 7: Binary threshold"""
@@ -460,52 +524,195 @@ class ImageProcessor:
     
     def technique_vhs_effect(self, image):
         """Technique 16: VHS Tape Effect"""
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        hsv[:,:,0] = np.clip(hsv[:,:,0] + np.random.randint(-10, 10, hsv[:,:,0].shape), 0, 179)
-        vhs_color = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-        noise = np.random.normal(0, 25, vhs_color.shape).astype(np.uint8)
-        vhs_noise = cv2.add(vhs_color, noise)
+        vhs = image.copy().astype(np.float32)
+        height, width = vhs.shape[:2]
         
-        height, width = vhs_noise.shape[:2]
-        for i in range(0, height, 3):
-            vhs_noise[i:i+1, :] = vhs_noise[i:i+1, :] * 0.7
+        # Add chromatic aberration (color shift) - typical VHS artifact
+        channels = list(cv2.split(vhs))  # Convert tuple to list for modification
+        shift_amount = np.random.randint(2, 5)
         
-        return cv2.GaussianBlur(vhs_noise, (3, 3), 0)
+        # Shift color channels slightly
+        channels[0] = np.roll(channels[0], shift_amount, axis=1)  # Blue channel shift
+        channels[2] = np.roll(channels[2], -shift_amount, axis=1)  # Red channel shift
+        vhs = cv2.merge(channels)
+        
+        # Add severe color noise/distortion
+        hsv = cv2.cvtColor(vhs.astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32)
+        hsv[:,:,0] += np.random.randint(-20, 20, hsv[:,:,0].shape)  # Hue shift
+        hsv[:,:,1] *= np.random.uniform(0.5, 1.5, hsv[:,:,1].shape)  # Saturation variation
+        hsv = np.clip(hsv, [0, 0, 0], [179, 255, 255])
+        vhs = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR).astype(np.float32)
+        
+        # Add heavy analog noise
+        noise = np.random.normal(0, 30, vhs.shape).astype(np.float32)
+        vhs = cv2.add(vhs, noise)
+        
+        # Add scan lines (horizontal artifacts)
+        for i in range(0, height, 2):
+            line_intensity = np.random.uniform(0.4, 0.8)
+            vhs[i:i+1, :] *= line_intensity
+        
+        # Add tracking noise (vertical glitches)
+        for _ in range(3):
+            glitch_y = np.random.randint(0, height)
+            glitch_height = np.random.randint(5, 20)
+            glitch_x_shift = np.random.randint(-10, 10)
+            
+            if glitch_y + glitch_height < height:
+                vhs[glitch_y:glitch_y+glitch_height, :] = np.roll(
+                    vhs[glitch_y:glitch_y+glitch_height, :], glitch_x_shift, axis=1
+                )
+        
+        # Add horizontal instability
+        for i in range(height):
+            shift = np.random.randint(-3, 3)
+            vhs[i, :] = np.roll(vhs[i, :], shift, axis=0)
+        
+        vhs = np.clip(vhs, 0, 255).astype(np.uint8)
+        
+        # Apply slight motion blur for that tape motion feel
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        vhs = cv2.filter2D(vhs, -1, kernel)
+        
+        return vhs
     
     def technique_pointillism(self, image):
         """Technique 17: Pointillism Generator"""
         height, width = image.shape[:2]
-        canvas = np.zeros_like(image)
-        dot_size = max(3, min(7, height // 100))
-        num_points = (height * width) // 800
         
-        for _ in range(num_points):
-            y = np.random.randint(0, height)
-            x = np.random.randint(0, width)
-            color = image[y, x].tolist()
-            cv2.circle(canvas, (x, y), dot_size, color, -1)
+        # Increase number of points for more realistic pointillism
+        num_points = (height * width) // 200  # Much more dots than before
+        dot_sizes = [2, 3, 4, 5, 6, 7, 8]  # Vary dot sizes for more interesting effect
         
-        pointillism = cv2.addWeighted(canvas, 0.8, image, 0.2, 0)
-        return cv2.GaussianBlur(pointillism, (3, 3), 0)
+        pointillism = image.copy()
+        
+        # Apply multiple layers of dots with varying opacity
+        for layer in range(2):
+            canvas = np.zeros_like(image, dtype=np.float32)
+            points_per_layer = num_points // 2
+            
+            for _ in range(points_per_layer):
+                y = np.random.randint(0, height)
+                x = np.random.randint(0, width)
+                dot_size = random.choice(dot_sizes)
+                
+                # Get color with slight variation
+                color = image[y, x].astype(np.float32)
+                # Add slight color variation for artistic effect
+                variation = np.random.uniform(0.85, 1.15, 3)
+                color = np.clip(color * variation, 0, 255)
+                
+                # Draw dot with anti-aliasing
+                cv2.circle(canvas, (x, y), dot_size, color, -1, cv2.LINE_AA)
+            
+            # Blend layer
+            alpha = 0.5 if layer == 0 else 0.3
+            pointillism = cv2.addWeighted(pointillism.astype(np.float32), 1.0, canvas, alpha, 0)
+        
+        pointillism = np.clip(pointillism, 0, 255).astype(np.uint8)
+        
+        # Add very subtle texture to simulate canvas
+        canvas_texture = np.random.normal(128, 3, pointillism.shape).astype(np.uint8)
+        pointillism = cv2.addWeighted(pointillism, 0.95, canvas_texture, 0.05, 0)
+        
+        return pointillism
     
     def technique_security_camera(self, image):
         """Technique 18: Security Camera Effect"""
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        noise = np.random.normal(0, 15, gray.shape).astype(np.uint8)
-        security = cv2.add(gray, noise)
+        height, width = image.shape[:2]
         
-        height, width = security.shape
-        small = cv2.resize(security, (width//2, height//2), interpolation=cv2.INTER_LINEAR)
-        security = cv2.resize(small, (width, height), interpolation=cv2.INTER_NEAREST)
+        # Convert to grayscale for CCTV look
+        security = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         
-        timestamp = "23:59:45 01/01/2024"
+        # Reduce resolution (typical of old security cameras)
+        reduced = cv2.resize(security, (width//3, height//3), interpolation=cv2.INTER_LINEAR)
+        security = cv2.resize(reduced, (width, height), interpolation=cv2.INTER_NEAREST)
+        
+        # Add realistic CCTV noise and artifacts
+        noise = np.random.normal(0, 20, security.shape).astype(np.int16)
+        security = np.clip(security.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+        
+        # Add horizontal scan lines (interlacing effect)
+        for i in range(0, height, 2):
+            security[i, :] = np.clip(security[i, :].astype(np.int16) - 15, 0, 255).astype(np.uint8)
+        
+        # Add motion blur lines randomly (typical of older tape cameras)
+        for _ in range(2):
+            blur_y = np.random.randint(0, height)
+            blur_height = np.random.randint(5, 15)
+            if blur_y + blur_height < height:
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+                security[blur_y:blur_y+blur_height, :] = cv2.filter2D(
+                    security[blur_y:blur_y+blur_height, :], -1, kernel
+                )
+        
+        # Add subtle vignette effect (darkened edges) without darkening too much
+        rows, cols = security.shape
+        X_resultant_kernel = cv2.getGaussianKernel(cols, cols/2.5)
+        Y_resultant_kernel = cv2.getGaussianKernel(rows, rows/2.5)
+        
+        # Generate vignette mask
+        resultant_kernel = Y_resultant_kernel * X_resultant_kernel.T
+        mask = resultant_kernel / resultant_kernel.max()
+        mask = (mask * 200 + 55).astype(np.uint8)  # Scale to keep values between 55-255
+        
+        security = cv2.multiply(security, mask)
+        
+        # Convert back to BGR for final output
+        security_bgr = cv2.cvtColor(security, cv2.COLOR_GRAY2BGR)
+        
+        # Add timestamp with realistic CCTV formatting
+        from datetime import datetime
+        current_time = datetime.now()
+        timestamp = current_time.strftime("%H:%M:%S %m/%d/%Y")
+        
         font = cv2.FONT_HERSHEY_SIMPLEX
-        text_size = cv2.getTextSize(timestamp, font, 0.5, 1)[0]
-        cv2.rectangle(security, (10, height - 30), (text_size[0] + 20, height - 10), 0, -1)
-        security = cv2.putText(security, timestamp, (15, height - 15), 
-                              font, 0.5, 255, 1, cv2.LINE_AA)
+        font_scale = 0.6
+        font_thickness = 1
         
-        return cv2.cvtColor(security, cv2.COLOR_GRAY2BGR)
+        # Add black background for timestamp
+        (text_width, text_height), baseline = cv2.getTextSize(timestamp, font, font_scale, font_thickness)
+        padding = 10
+        cv2.rectangle(security_bgr, 
+                     (5, height - text_height - padding - 5),
+                     (text_width + padding + 5, height - 5),
+                     (0, 0, 0), -1)
+        
+        # Add white timestamp text
+        cv2.putText(security_bgr, timestamp, 
+                   (10, height - 10), 
+                   font, font_scale, (255, 255, 255), font_thickness, cv2.LINE_AA)
+        
+        # Add camera info/ID
+        camera_id = "CAM-01"
+        cv2.putText(security_bgr, camera_id,
+                   (10, 25),
+                   font, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+        
+        # Add REC indicator (recording)
+        rec_color = (0, 0, 255)  # Red
+        cv2.circle(security_bgr, (width - 30, 25), 8, rec_color, -1)
+        cv2.putText(security_bgr, "REC",
+                   (width - 55, 30),
+                   font, 0.5, rec_color, 1, cv2.LINE_AA)
+        
+        # Add resolution indicator
+        res_text = f"{width}x{height}"
+        cv2.putText(security_bgr, res_text,
+                   (width - 150, height - 10),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
+        
+        # Add random tracking glitches
+        if np.random.random() > 0.7:
+            glitch_y = np.random.randint(0, height)
+            glitch_height = np.random.randint(3, 8)
+            glitch_x_shift = np.random.randint(-5, 5)
+            if glitch_y + glitch_height < height:
+                security_bgr[glitch_y:glitch_y+glitch_height, :] = np.roll(
+                    security_bgr[glitch_y:glitch_y+glitch_height, :], glitch_x_shift, axis=1
+                )
+        
+        return security_bgr
     
     def technique_film_burn(self, image):
         """Technique 19: Film Burn Transition"""
@@ -557,56 +764,188 @@ class ImageProcessor:
         height, width = image.shape[:2]
         stitched = image.copy()
         
-        # Add grid lines
-        grid_color = (100, 100, 100)
-        grid_thickness = 2
+        # Create panorama-like effect by creating a tiled layout
+        # Split image into sections
+        sections = []
+        num_sections = 3
+        section_width = width // num_sections
         
-        for x in range(width//4, width, width//4):
-            cv2.line(stitched, (x, 0), (x, height), grid_color, grid_thickness)
+        # Apply slight variations to each section to simulate different exposures
+        for i in range(num_sections):
+            x_start = i * section_width
+            x_end = x_start + section_width if i < num_sections - 1 else width
+            
+            section = stitched[:, x_start:x_end].copy()
+            
+            # Apply slight perspective warp to each section
+            if i == 0:
+                # Left section - slight rotation
+                angle = np.random.uniform(-5, 0)
+            elif i == 1:
+                # Middle section - straight
+                angle = 0
+            else:
+                # Right section - slight rotation
+                angle = np.random.uniform(0, 5)
+            
+            # Apply rotation
+            center = (section.shape[1] // 2, section.shape[0] // 2)
+            M = cv2.getRotationMatrix2D(center, angle, 1.0)
+            section = cv2.warpAffine(section, M, (section.shape[1], section.shape[0]))
+            
+            # Apply different brightness to simulate exposure bracketing
+            brightness_factor = 0.9 + (i * 0.1)
+            section = cv2.convertScaleAbs(section, alpha=brightness_factor, beta=0)
+            
+            stitched[:, x_start:x_end] = section
         
-        for y in range(height//4, height, height//4):
-            cv2.line(stitched, (0, y), (width, y), grid_color, grid_thickness)
+        # Add blend lines where sections meet (seams)
+        for i in range(1, num_sections):
+            x_seam = i * section_width
+            # Add a subtle gradient at seams
+            blend_width = 15
+            for dx in range(blend_width):
+                alpha = (dx + 1) / (blend_width + 1)
+                x_left = x_seam - blend_width + dx
+                x_right = x_seam + dx
+                if x_left >= 0 and x_right < width:
+                    stitched[:, x_seam - blend_width + dx] = cv2.addWeighted(
+                        stitched[:, x_left], 1 - alpha,
+                        stitched[:, x_right], alpha, 0
+                    )
         
-        # Add perspective warp
-        rows, cols = stitched.shape[:2]
-        src_points = np.float32([[0, 0], [cols, 0], [0, rows], [cols, rows]])
-        dst_points = np.float32([[10, 10], [cols-10, 30], [10, rows-10], [cols-10, rows-30]])
+        # Add panorama grid overlay
+        grid_color = (100, 150, 100)
+        for i in range(num_sections):
+            x = i * section_width
+            cv2.line(stitched, (x, 0), (x, height), grid_color, 2)
         
-        matrix = cv2.getPerspectiveTransform(src_points, dst_points)
-        stitched = cv2.warpPerspective(stitched, matrix, (cols, rows))
+        # Add panorama label
+        cv2.putText(stitched, "Panorama Stitching", (10, 30),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 200, 0), 2)
+        
+        # Show number of sections
+        cv2.putText(stitched, f"Sections: {num_sections}", (10, 60),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 150, 0), 1)
         
         return stitched
     
     def technique_background_subtraction(self, image):
         """Technique 22: Background Subtraction"""
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        _, foreground_mask = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        background_mask = cv2.bitwise_not(foreground_mask)
-        background = cv2.GaussianBlur(image, (15, 15), 0)
-        foreground = cv2.bitwise_and(image, image, mask=foreground_mask)
-        background = cv2.bitwise_and(background, background, mask=background_mask)
-        result = cv2.add(foreground, background)
+        height, width = image.shape[:2]
         
+        # Convert to grayscale
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        # Apply morphological operations for better foreground detection
+        blurred = cv2.GaussianBlur(gray, (7, 7), 0)
+        
+        # Use adaptive thresholding for better foreground detection
+        _, foreground_mask = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        
+        # Apply morphological operations to clean up the mask
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        foreground_mask = cv2.morphologyEx(foreground_mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+        foreground_mask = cv2.morphologyEx(foreground_mask, cv2.MORPH_OPEN, kernel, iterations=1)
+        
+        # Create background mask
+        background_mask = cv2.bitwise_not(foreground_mask)
+        
+        # Create blurred background
+        background = cv2.GaussianBlur(image, (25, 25), 0)
+        
+        # Extract foreground and background
+        foreground = cv2.bitwise_and(image, image, mask=foreground_mask)
+        background_result = cv2.bitwise_and(background, background, mask=background_mask)
+        
+        # Combine foreground and blurred background
+        result = cv2.add(foreground, background_result)
+        
+        # Find and draw contours of detected objects
         contours, _ = cv2.findContours(foreground_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
         if contours:
-            largest_contour = max(contours, key=cv2.contourArea)
-            cv2.drawContours(result, [largest_contour], -1, (0, 255, 0), 2)
+            # Sort contours by area and keep the largest ones
+            contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
+            
+            # Draw all major contours
+            for i, contour in enumerate(contours):
+                area = cv2.contourArea(contour)
+                if area > 100:  # Only draw significant contours
+                    # Draw filled contour with semi-transparency effect
+                    cv2.drawContours(result, [contour], -1, (0, 255, 0), 2)
+                    
+                    # Get bounding box and draw it
+                    x, y, w, h = cv2.boundingRect(contour)
+                    cv2.rectangle(result, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                    
+                    # Add area label
+                    if i == 0:  # Label the largest object
+                        cv2.putText(result, f"Area: {int(area)}", (x, y - 10),
+                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        
+        # Add statistics panel
+        num_objects = len([c for c in contours if cv2.contourArea(c) > 100]) if contours else 0
+        cv2.putText(result, f"Objects Detected: {num_objects}", (10, 30),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        
+        # Add legend
+        cv2.putText(result, "Green: Foreground Edge | Blue: Bounding Box",
+                   (10, height - 10),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
         
         return result
     
     def technique_image_compression(self, image, quality=50):
         """Technique 23: Image Compression"""
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
-        result, encimg = cv2.imencode('.jpg', image, encode_param)
+        compressed = image.copy()
         
-        if result:
-            compressed = cv2.imdecode(encimg, cv2.IMREAD_COLOR)
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(compressed, f"JPEG Q{quality}", (10, 30), font, 0.7, (0, 0, 255), 2)
-            return compressed
-        else:
-            return image
+        # Apply multiple rounds of compression/decompression to show artifacts
+        for compression_round in range(3):
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality - (compression_round * 10)]
+            encode_param[1] = max(encode_param[1], 10)  # Minimum quality 10
+            result, encimg = cv2.imencode('.jpg', compressed, encode_param)
+            
+            if result:
+                compressed = cv2.imdecode(encimg, cv2.IMREAD_COLOR)
+        
+        # Add blockiness effect (8x8 blocks typical of JPEG)
+        block_size = 8
+        h, w = compressed.shape[:2]
+        
+        # Create visible block artifacts
+        for y in range(0, h, block_size):
+            for x in range(0, w, block_size):
+                # Get the block
+                block = compressed[y:y+block_size, x:x+block_size]
+                # Add subtle edge darkening to show block boundaries
+                if block.shape[0] > 0 and block.shape[1] > 0:
+                    # Darken edges
+                    block[0, :] = (block[0, :] * 0.85).astype(np.uint8)
+                    block[-1, :] = (block[-1, :] * 0.85).astype(np.uint8)
+                    block[:, 0] = (block[:, 0] * 0.85).astype(np.uint8)
+                    block[:, -1] = (block[:, -1] * 0.85).astype(np.uint8)
+        
+        # Add compression info overlay
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        info_text = f"JPEG Quality: {quality}%"
+        cv2.putText(compressed, info_text, (10, 30), font, 0.7, (0, 0, 255), 2)
+        
+        # Calculate compression ratio
+        original_size = image.nbytes
+        encode_param_final = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+        _, encimg_final = cv2.imencode('.jpg', image, encode_param_final)
+        compressed_size = len(encimg_final) if hasattr(encimg_final, '__len__') else 1000
+        
+        ratio = (compressed_size / original_size) * 100
+        ratio_text = f"Size: {ratio:.1f}%"
+        cv2.putText(compressed, ratio_text, (10, 60), font, 0.6, (0, 100, 255), 1)
+        
+        # Show file size metrics
+        size_text = f"Est. {compressed_size // 1024}KB"
+        cv2.putText(compressed, size_text, (10, 85), font, 0.5, (100, 100, 255), 1)
+        
+        return compressed
     
     def technique_style_transfer(self, image):
         """Technique 24: Style Transfer"""
@@ -639,40 +978,87 @@ class ImageProcessor:
         """Technique 25: Optical Flow (simulated)"""
         height, width = image.shape[:2]
         flow_display = image.copy()
-        grid_size = 20
+        
+        # Create a more realistic optical flow using edge detection
+        gray = cv2.cvtColor(flow_display, cv2.COLOR_BGR2GRAY)
+        edges = cv2.Canny(gray, 50, 150)
+        
+        # Create denser motion grid
+        grid_size = 15
         points = []
         
         for y in range(grid_size, height - grid_size, grid_size):
             for x in range(grid_size, width - grid_size, grid_size):
                 points.append((x, y))
         
+        # Create flow field based on image gradients
+        sobel_x = cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3)
+        sobel_y = cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3)
+        
+        # Calculate motion vectors for each point
         for (x, y) in points:
-            angle = np.random.uniform(0, 2 * np.pi)
-            magnitude = np.random.uniform(5, 15)
-            x2 = int(x + magnitude * np.cos(angle))
-            y2 = int(y + magnitude * np.sin(angle))
-            cv2.arrowedLine(flow_display, (x, y), (x2, y2), 
-                           (0, 255, 0), 1, tipLength=0.3)
-            cv2.circle(flow_display, (x, y), 2, (0, 0, 255), -1)
+            if 0 <= y < height and 0 <= x < width:
+                # Get gradient at this point
+                gx = sobel_x[y, x]
+                gy = sobel_y[y, x]
+                
+                # Calculate angle and magnitude from gradients
+                magnitude = np.sqrt(gx**2 + gy**2)
+                
+                if magnitude > 10:
+                    # Normalize and scale
+                    angle = np.arctan2(gy, gx)
+                    motion_magnitude = min(magnitude / 10, 25)
+                else:
+                    # Random motion if no strong gradient
+                    angle = np.random.uniform(0, 2 * np.pi)
+                    motion_magnitude = np.random.uniform(5, 15)
+                
+                # Calculate end point
+                x2 = int(x + motion_magnitude * np.cos(angle))
+                y2 = int(y + motion_magnitude * np.sin(angle))
+                
+                # Clamp to image bounds
+                x2 = np.clip(x2, 0, width - 1)
+                y2 = np.clip(y2, 0, height - 1)
+                
+                # Draw arrow with color based on magnitude
+                color_intensity = int(np.clip(motion_magnitude * 10, 0, 255))
+                color = (color_intensity, 255 - color_intensity // 2, 100)
+                
+                cv2.arrowedLine(flow_display, (x, y), (x2, y2), 
+                               color, 2, tipLength=0.4)
+                cv2.circle(flow_display, (x, y), 3, (255, 100, 0), -1)
         
-        heatmap = np.zeros((height, width), dtype=np.uint8)
-        for _ in range(5):
-            center_x = np.random.randint(0, width)
-            center_y = np.random.randint(0, height)
-            radius = np.random.randint(30, 100)
-            
-            for y in range(max(0, center_y - radius), min(height, center_y + radius)):
-                for x in range(max(0, center_x - radius), min(width, center_x + radius)):
-                    dist = np.sqrt((x - center_x)**2 + (y - center_y)**2)
-                    if dist < radius:
-                        intensity = int(255 * (1 - dist/radius))
-                        heatmap[y, x] = max(heatmap[y, x], intensity)
+        # Create detailed heatmap from gradient magnitude
+        magnitude_full = np.sqrt(sobel_x**2 + sobel_y**2)
+        heatmap = cv2.normalize(magnitude_full, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
         
+        # Apply Gaussian blur for smoothness
+        heatmap = cv2.GaussianBlur(heatmap, (15, 15), 0)
+        
+        # Apply color map
         heatmap_color = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-        flow_display = cv2.addWeighted(flow_display, 0.7, heatmap_color, 0.3, 0)
         
-        cv2.putText(flow_display, "Optical Flow", (10, 30), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        # Blend with original
+        flow_display = cv2.addWeighted(flow_display, 0.65, heatmap_color, 0.35, 0)
+        
+        # Add information panel
+        cv2.putText(flow_display, "Optical Flow Analysis", (10, 30), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+        cv2.putText(flow_display, "Motion: Green=Arrows, Red-Blue=Intensity", (10, 60), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+        
+        # Add legend
+        cv2.line(flow_display, (width - 200, height - 50), (width - 100, height - 50), 
+                (0, 255, 0), 3)
+        cv2.putText(flow_display, "Low Motion", (width - 95, height - 45),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0), 1)
+        
+        cv2.line(flow_display, (width - 200, height - 25), (width - 100, height - 25),
+                (255, 100, 0), 3)
+        cv2.putText(flow_display, "High Motion", (width - 95, height - 20),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 100, 0), 1)
         
         return flow_display
     
@@ -731,11 +1117,11 @@ class ImageProcessor:
         # Map technique name to method
         technique_methods = {
             'canny_edge': self.technique_canny_edge,
-            'color_invert': self.technique_color_invert,
+            'anime_style': self.technique_anime_style,
             'sepia_tone': self.technique_sepia_tone,
             'pencil_sketch': self.technique_pencil_sketch,
             'sharpen': self.technique_sharpen,
-            'brightness_contrast': self.technique_brightness_contrast,
+            'edge_detection': self.technique_edge_detection,
             'binary_threshold': self.technique_binary_threshold,
             'emboss': self.technique_emboss,
             'oil_painting': self.technique_oil_painting,
