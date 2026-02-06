@@ -14,39 +14,44 @@ def display_banner():
     print(banner)
 
 def display_all_techniques():
-    """Display all 22 implemented techniques"""
+    """Display all 25 implemented techniques"""
     categories = {
         "Basic Techniques": [
-            ("1", "Grayscale", "Convert to black and white"),
-            ("2", "Canny Edge Detection", "Detect edges with Canny algorithm"),
-            ("3", "Color Inversion", "Create negative image"),
-            ("4", "Gaussian Blur", "Apply smooth blur"),
-            ("5", "Sepia Tone", "Vintage brown filter"),
-            ("6", "Pencil Sketch", "Convert to pencil drawing"),
-            ("7", "Image Sharpening", "Enhance details"),
-            ("8", "Brightness/Contrast", "Adjust light levels"),
-            ("9", "Binary Threshold", "Pure black and white"),
-            ("10", "Emboss Effect", "3D relief effect")
+            ("1", "Canny Edge Detection", "Detect edges with Canny algorithm"),
+            ("2", "Color Inversion", "Create negative image"),
+            ("3", "Sepia Tone", "Vintage brown filter"),
+            ("4", "Pencil Sketch", "Convert to pencil drawing"),
+            ("5", "Image Sharpening", "Enhance details"),
+            ("6", "Brightness/Contrast", "Adjust light levels"),
+            ("7", "Binary Threshold", "Pure black and white"),
+            ("8", "Emboss Effect", "3D relief effect")
         ],
         "Advanced Techniques": [
-            ("11", "Oil Painting", "Oil painting artistic effect"),
-            ("12", "Cartoon Effect", "Cartoon style"),
-            ("13", "HDR Effect", "High dynamic range enhancement"),
-            ("14", "Watercolor", "Watercolor painting effect"),
-            ("15", "Vignette", "Darkened corners effect")
+            ("9", "Oil Painting", "Oil painting artistic effect"),
+            ("10", "Cartoon Effect", "Cartoon style"),
+            ("11", "HDR Effect", "High dynamic range enhancement"),
+            ("12", "Watercolor", "Watercolor painting effect"),
+            ("13", "Vignette", "Darkened corners effect")
         ],
         "Artistic Effects": [
-            ("16", "ASCII Art", "Text-based retro effect"),
-            ("17", "VHS Effect", "Analog tape degradation"),
-            ("18", "Pointillism", "Classic painting technique"),
-            ("19", "Security Camera", "Surveillance camera effect"),
-            ("20", "Film Burn", "Cinematic light leak effect"),
-            ("21", "Embroidery", "Stitching pattern effect"),
-            ("22", "Enhanced Edge Detection", "Combined edge methods")
+            ("14", "Movie Poster", "Cinematic poster with title and credits"),
+            ("15", "Album Cover", "Music album cover design"),
+            ("16", "VHS Effect", "Analog tape degradation"),
+            ("17", "Pointillism", "Classic painting technique"),
+            ("18", "Security Camera", "Surveillance camera effect"),
+            ("19", "Film Burn", "Cinematic light leak effect"),
+            ("20", "Embroidery", "Stitching pattern effect")
+        ],
+        "Computer Vision Techniques": [
+            ("21", "Panorama Stitching", "Image stitching for panoramas"),
+            ("22", "Background Subtraction", "Remove/change background"),
+            ("23", "Image Compression", "JPEG compression simulation"),
+            ("24", "Style Transfer", "Apply artistic styles"),
+            ("25", "Optical Flow", "Motion vector visualization")
         ]
     }
     
-    print("IMPLEMENTED TECHNIQUES (22 Total):")
+    print("IMPLEMENTED TECHNIQUES (25 Total):")
     print("=" * 70)
     
     for category, techniques in categories.items():
@@ -64,13 +69,14 @@ def display_usage():
     print("\nEXAMPLES:")
     print("  python main.py                        # Use default directories")
     print("  python main.py input output           # Specify directories")
-    print("  python main.py --techniques grayscale,canny,sepia  # Specific techniques")
+    print("  python main.py --techniques canny_edge,sepia,movie_poster  # Specific techniques")
     print("\nOPTIONS:")
     print("  --techniques TECH1,TECH2,...  Apply only specified techniques")
-    print("  --all                         Apply all 22 techniques (default)")
-    print("  --basic                       Apply only basic techniques (1-10)")
-    print("  --advanced                    Apply only advanced techniques (11-15)")
-    print("  --artistic                    Apply only artistic effects (16-22)")
+    print("  --all                         Apply all 25 techniques (default)")
+    print("  --basic                       Apply only basic techniques (1-8)")
+    print("  --advanced                    Apply only advanced techniques (9-13)")
+    print("  --artistic                    Apply only artistic effects (14-20)")
+    print("  --cv                          Apply only computer vision techniques (21-25)")
 
 def parse_arguments():
     """Parse command line arguments"""
@@ -95,9 +101,8 @@ def parse_arguments():
         
         elif arg == '--basic':
             args['techniques'] = [
-                'grayscale', 'canny_edge', 'color_invert', 'gaussian_blur',
-                'sepia_tone', 'pencil_sketch', 'sharpen', 'brightness_contrast',
-                'binary_threshold', 'emboss'
+                'canny_edge', 'color_invert', 'sepia_tone', 'pencil_sketch',
+                'sharpen', 'brightness_contrast', 'binary_threshold', 'emboss'
             ]
             i += 1
         
@@ -109,8 +114,15 @@ def parse_arguments():
         
         elif arg == '--artistic':
             args['techniques'] = [
-                'ascii_art', 'vhs_effect', 'pointillism', 'security_camera',
-                'film_burn', 'embroidery', 'edge_detection'
+                'movie_poster', 'album_cover', 'vhs_effect', 'pointillism',
+                'security_camera', 'film_burn', 'embroidery'
+            ]
+            i += 1
+        
+        elif arg == '--cv':
+            args['techniques'] = [
+                'image_stitching', 'background_subtraction', 'image_compression',
+                'style_transfer', 'optical_flow'
             ]
             i += 1
         
@@ -156,7 +168,7 @@ def main():
         if len(args['techniques']) <= 10:
             print(f"                    {', '.join(args['techniques'])}")
     else:
-        print(f"  Techniques:       All 22 techniques")
+        print(f"  Techniques:       All 25 techniques")
     
     print()
     
@@ -213,7 +225,7 @@ def main():
         # Suggest next steps
         print("\n NEXT STEPS:")
         print("  1. View results in the output folder")
-        print("  2. Run demo/technique_visualizer.py for visual comparisons")
+        print("  2. Try different technique groups: --basic, --advanced, --artistic, --cv")
         
     else:
         print("No images were processed.")
