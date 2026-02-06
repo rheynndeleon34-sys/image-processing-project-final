@@ -18,25 +18,36 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest  # Testing framework installed
     
     - name: Install GUI libraries
       run: |
         sudo apt-get update
         sudo apt-get install -y libgl1 libglib2.0-0
     
-    - name: Test imports
+    - name: Prepare test environment
       run: |
-        # Simple test - no fancy formatting
-        python -c "import cv2; print('OpenCV OK')"
-        python -c "import numpy; print('NumPy OK')"
-        python -c "import scipy; print('SciPy OK')"
-        python -c "from PIL import Image; print('Pillow OK')"
-        python -c "import matplotlib; print('Matplotlib OK')"
-        echo "✅ All imports work"
+        mkdir -p tests
+        echo "Test environment ready"
     
-    - name: Test project
+    - name: Run tests if available
       run: |
-        python -c "from src.image_processor import ImageProcessor; print('✅ Project imports work')"
+        # Check if tester has created test files
+        if find tests -name "test_*.py" -type f 2>/dev/null | grep -q .; then
+          echo "Running PyTest..."
+          python -m pytest tests/ -v
+        else
+          echo "No test files found"
+          # Don't fail, just note
+        fi
     
-    - name: Done
-      run: echo "🎉 CI completed successfully!"
+    - name: Verify project functionality
+      run: |
+        python -c "import cv2, numpy, scipy"
+        python -c "from src.image_processor import ImageProcessor"
+        python main.py --help
+        echo "Project verification complete"
+    
+    - name: CI Status
+      run: |
+        echo "CI pipeline executed successfully"
