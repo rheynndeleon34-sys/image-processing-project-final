@@ -14,59 +14,29 @@ jobs:
       with:
         python-version: '3.10'
     
-    - name: Install EXACT dependencies from requirements.txt
+    - name: Install dependencies
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
-        echo "✅ All dependencies installed"
     
-    - name: Install GUI libraries (for opencv-python)
+    - name: Install GUI libraries
       run: |
         sudo apt-get update
         sudo apt-get install -y libgl1 libglib2.0-0
-        echo "✅ GUI dependencies installed"
     
-    - name: Test ALL imports
+    - name: Test imports
       run: |
-        echo "Testing imports from your actual code..."
-        python -c "
-        # Test EXACTLY what your code imports
-        import cv2
-        import numpy as np
-        from PIL import Image
-        from scipy import ndimage
-        import matplotlib
-        
-        print(f'✅ cv2 {cv2.__version__}')
-        print(f'✅ numpy {np.__version__}')
-        print(f'✅ scipy {scipy.__version__}')
-        print(f'✅ Pillow {Image.__version__}')
-        print('✅ ALL IMPORTS WORK!')
-        "
+        # Simple test - no fancy formatting
+        python -c "import cv2; print('OpenCV OK')"
+        python -c "import numpy; print('NumPy OK')"
+        python -c "import scipy; print('SciPy OK')"
+        python -c "from PIL import Image; print('Pillow OK')"
+        python -c "import matplotlib; print('Matplotlib OK')"
+        echo "✅ All imports work"
     
-    - name: Test project structure
+    - name: Test project
       run: |
-        echo "Testing project imports..."
-        python -c "
-        try:
-            from src.image_processor import ImageProcessor
-            print('✅ ImageProcessor imported successfully!')
-        except Exception as e:
-            print(f'❌ Error: {e}')
-            raise
-        "
+        python -c "from src.image_processor import ImageProcessor; print('✅ Project imports work')"
     
-    - name: Run demo script
-      run: |
-        echo "Creating demo images..."
-        python demo/create_demo_images.py || echo "Demo script ran"
-    
-    - name: Success
-      run: |
-        echo "🎉 CI SUCCESS!"
-        echo "Dependencies confirmed:"
-        echo "- opencv-python"
-        echo "- numpy"
-        echo "- scipy  ⭐ (previously missing)"
-        echo "- Pillow"
-        echo "- matplotlib"
+    - name: Done
+      run: echo "🎉 CI completed successfully!"
