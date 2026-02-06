@@ -1,13 +1,21 @@
+"""
+Enhanced Image Processing Module
+Contains 22 image processing techniques including advanced filters.
+Author: [Your Name] - Image Processing Programmer
+Date: [Current Date]
+"""
+
 import cv2
 import numpy as np
 from pathlib import Path
 import os
+import random
 from .filters.advanced_filters import AdvancedFilters
 
 class ImageProcessor:
     """
-    Enhanced class implementing 15 image processing techniques.
-    Includes basic and advanced techniques.
+    Enhanced class implementing 22 image processing techniques.
+    Includes basic, advanced, and artistic techniques.
     """
     
     def __init__(self, input_dir="input", output_dir="output"):
@@ -30,7 +38,7 @@ class ImageProcessor:
         # Initialize advanced filters
         self.advanced = AdvancedFilters()
         
-        # Define all 15 techniques with display names
+        # Define all 22 techniques with display names
         self.techniques = {
             # Basic Techniques (1-10)
             'grayscale': 'Grayscale',
@@ -49,7 +57,16 @@ class ImageProcessor:
             'cartoon': 'Cartoon Effect',
             'hdr': 'HDR Effect',
             'watercolor': 'Watercolor',
-            'vignette': 'Vignette Effect'
+            'vignette': 'Vignette Effect',
+            
+            # New Techniques (16-22)
+            'ascii_art': 'ASCII Art Effect',
+            'vhs_effect': 'VHS Tape Effect',
+            'pointillism': 'Pointillism Generator',
+            'security_camera': 'Security Camera Effect',
+            'film_burn': 'Film Burn Transition',
+            'embroidery': 'Embroidery Pattern',
+            'edge_detection': 'Enhanced Edge Detection'
         }
         
         print(f"Initialized Enhanced Image Processor")
@@ -58,7 +75,7 @@ class ImageProcessor:
         print(f"  Output directory: {self.output_dir}")
     
     # ===========================================
-    # 15 IMAGE PROCESSING TECHNIQUES
+    # 22 IMAGE PROCESSING TECHNIQUES
     # ===========================================
     
     # Basic Techniques (1-10) - Keep existing implementations
@@ -144,6 +161,245 @@ class ImageProcessor:
         return self.advanced.vignette_effect(image, vignette_strength=0.7)
     
     # ===========================================
+    # NEW TECHNIQUES (16-22)
+    # ===========================================
+    
+    def technique_ascii_art(self, image):
+        """
+        Technique 16: ASCII Art Effect (text-based, retro computing)
+        Creates a low-resolution effect that mimics ASCII art
+        """
+        # Resize to small dimensions for ASCII effect
+        height, width = image.shape[:2]
+        small_h, small_w = 80, 80
+        resized = cv2.resize(image, (small_w, small_h), interpolation=cv2.INTER_LINEAR)
+        
+        # Convert to grayscale
+        gray = self.technique_grayscale(resized)
+        
+        # Upscale back to original size with nearest neighbor for blocky effect
+        ascii_effect = cv2.resize(gray, (width, height), interpolation=cv2.INTER_NEAREST)
+        
+        # Add contrast for better ASCII-like appearance
+        ascii_effect = cv2.convertScaleAbs(ascii_effect, alpha=1.5, beta=30)
+        
+        # Convert back to 3 channels if needed
+        if len(ascii_effect.shape) == 2:
+            ascii_effect = cv2.cvtColor(ascii_effect, cv2.COLOR_GRAY2BGR)
+        
+        return ascii_effect
+    
+    def technique_vhs_effect(self, image):
+        """
+        Technique 17: VHS Tape Effect (analog video degradation)
+        Simulates VHS tape artifacts: noise, color bleeding, scan lines
+        """
+        # Create VHS color distortion
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        
+        # Add color shift (VHS color bleeding effect)
+        hsv[:,:,0] = np.clip(hsv[:,:,0] + np.random.randint(-10, 10, hsv[:,:,0].shape), 0, 179)
+        
+        # Convert back to BGR
+        vhs_color = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+        
+        # Add noise (VHS tape noise)
+        noise = np.random.normal(0, 25, vhs_color.shape).astype(np.uint8)
+        vhs_noise = cv2.add(vhs_color, noise)
+        
+        # Add scan lines (VHS horizontal lines)
+        height, width = vhs_noise.shape[:2]
+        for i in range(0, height, 3):
+            vhs_noise[i:i+1, :] = vhs_noise[i:i+1, :] * 0.7
+        
+        # Add slight blur for VHS softness
+        vhs_blur = cv2.GaussianBlur(vhs_noise, (3, 3), 0)
+        
+        return vhs_blur
+    
+    def technique_pointillism(self, image):
+        """
+        Technique 18: Pointillism Generator (classic art technique)
+        Creates a pointillism painting effect with colored dots
+        """
+        height, width = image.shape[:2]
+        pointillism = image.copy()
+        
+        # Create a blank canvas
+        canvas = np.zeros_like(image)
+        
+        # Determine dot size based on image dimensions
+        dot_size = max(3, min(7, height // 100))
+        
+        # Sample points and draw colored circles
+        num_points = (height * width) // 800  # Adjust density
+        
+        for _ in range(num_points):
+            # Random position
+            y = np.random.randint(0, height)
+            x = np.random.randint(0, width)
+            
+            # Get color from original image
+            color = image[y, x].tolist()
+            
+            # Draw circle with the sampled color
+            cv2.circle(canvas, (x, y), dot_size, color, -1)
+        
+        # Blend with original for texture
+        pointillism = cv2.addWeighted(canvas, 0.8, image, 0.2, 0)
+        
+        # Add slight blur to soften
+        pointillism = cv2.GaussianBlur(pointillism, (3, 3), 0)
+        
+        return pointillism
+    
+    def technique_security_camera(self, image):
+        """
+        Technique 19: Security Camera Effect (modern surveillance aesthetic)
+        Creates a low-quality security camera look with timestamp
+        """
+        # Convert to grayscale for security camera look
+        gray = self.technique_grayscale(image)
+        
+        # Add noise (security camera interference)
+        noise = np.random.normal(0, 15, gray.shape).astype(np.uint8)
+        security = cv2.add(gray, noise)
+        
+        # Lower resolution effect
+        height, width = security.shape
+        small = cv2.resize(security, (width//2, height//2), interpolation=cv2.INTER_LINEAR)
+        security = cv2.resize(small, (width, height), interpolation=cv2.INTER_NEAREST)
+        
+        # Add timestamp overlay (simulated)
+        timestamp = "23:59:45 01/01/2024"
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        text_size = cv2.getTextSize(timestamp, font, 0.5, 1)[0]
+        
+        # Create a black rectangle for timestamp
+        cv2.rectangle(security, (10, height - 30), (text_size[0] + 20, height - 10), 0, -1)
+        
+        # Add white timestamp text
+        security = cv2.putText(security, timestamp, (15, height - 15), 
+                              font, 0.5, 255, 1, cv2.LINE_AA)
+        
+        # Convert back to 3 channels if needed
+        if len(security.shape) == 2:
+            security = cv2.cvtColor(security, cv2.COLOR_GRAY2BGR)
+        
+        return security
+    
+    def technique_film_burn(self, image):
+        """
+        Technique 20: Film Burn Transition (cinematic drama)
+        Creates a film burn effect with light leaks and color shifts
+        """
+        height, width = image.shape[:2]
+        film_burn = image.copy()
+        
+        # Create light leak effect (yellow/orange overlay)
+        light_leak = np.zeros_like(image)
+        
+        # Add gradient light leak
+        for i in range(height):
+            # Create orange-yellow gradient
+            intensity = int(255 * (1 - abs(i - height/2) / (height/2)))
+            light_leak[i, :] = [0, intensity//2, intensity]  # BGR format
+        
+        # Add random burn spots
+        for _ in range(5):  # Number of burn spots
+            center_x = np.random.randint(0, width)
+            center_y = np.random.randint(0, height)
+            radius = np.random.randint(20, min(width, height)//4)
+            
+            # Create circular burn
+            for y in range(max(0, center_y - radius), min(height, center_y + radius)):
+                for x in range(max(0, center_x - radius), min(width, center_x + radius)):
+                    dist = np.sqrt((x - center_x)**2 + (y - center_y)**2)
+                    if dist < radius:
+                        # Darken pixels near burn center
+                        darkness = int(255 * (1 - dist/radius) * 0.7)
+                        film_burn[y, x] = np.clip(film_burn[y, x] - darkness, 0, 255)
+        
+        # Blend with light leak
+        film_burn = cv2.addWeighted(film_burn, 0.8, light_leak, 0.3, 0)
+        
+        # Add film grain
+        grain = np.random.normal(0, 10, film_burn.shape).astype(np.uint8)
+        film_burn = cv2.add(film_burn, grain)
+        
+        # Add vignette for dramatic effect
+        vignette = self.technique_vignette(film_burn)
+        
+        return vignette
+    
+    def technique_embroidery(self, image):
+        """
+        Technique 21: Embroidery Pattern
+        Creates an embroidery/stiching effect with pattern-like edges
+        """
+        # Edge detection for embroidery outline
+        gray = self.technique_grayscale(image)
+        edges = cv2.Canny(gray, 50, 150)
+        
+        # Dilate edges to make them thicker (like embroidery thread)
+        kernel = np.ones((2, 2), np.uint8)
+        thick_edges = cv2.dilate(edges, kernel, iterations=1)
+        
+        # Create embroidery effect
+        embroidery = image.copy()
+        
+        # Convert edges to color (red for embroidery look)
+        colored_edges = np.zeros_like(image)
+        colored_edges[thick_edges > 0] = [0, 0, 255]  # Red color in BGR
+        
+        # Reduce color palette for fabric-like appearance
+        reduced_colors = cv2.convertScaleAbs(image, alpha=0.7, beta=30)
+        
+        # Combine reduced colors with embroidery edges
+        embroidery = cv2.addWeighted(reduced_colors, 0.9, colored_edges, 0.4, 0)
+        
+        # Add texture (simulating fabric)
+        texture = np.random.normal(0, 5, embroidery.shape).astype(np.uint8)
+        embroidery = cv2.add(embroidery, texture)
+        
+        return embroidery
+    
+    def technique_edge_detection(self, image):
+        """
+        Technique 22: Enhanced Edge Detection
+        More sophisticated edge detection with artistic presentation
+        """
+        # Convert to grayscale
+        gray = self.technique_grayscale(image)
+        
+        # Apply multiple edge detection methods
+        # 1. Sobel edges
+        sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+        sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        sobel = np.sqrt(sobel_x**2 + sobel_y**2)
+        sobel = np.uint8(np.clip(sobel, 0, 255))
+        
+        # 2. Laplacian edges
+        laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+        laplacian = np.uint8(np.clip(np.abs(laplacian), 0, 255))
+        
+        # 3. Canny edges
+        canny = cv2.Canny(gray, 50, 150)
+        
+        # Combine edges with different weights
+        combined = cv2.addWeighted(sobel, 0.4, laplacian, 0.3, 0)
+        combined = cv2.addWeighted(combined, 0.7, canny, 0.3, 0)
+        
+        # Invert for black edges on white background
+        edges_inverted = cv2.bitwise_not(combined)
+        
+        # Convert to 3 channels if needed
+        if len(edges_inverted.shape) == 2:
+            edges_inverted = cv2.cvtColor(edges_inverted, cv2.COLOR_GRAY2BGR)
+        
+        return edges_inverted
+    
+    # ===========================================
     # IMAGE PROCESSING PIPELINE
     # ===========================================
     
@@ -211,7 +467,14 @@ class ImageProcessor:
             'cartoon': self.technique_cartoon,
             'hdr': self.technique_hdr,
             'watercolor': self.technique_watercolor,
-            'vignette': self.technique_vignette
+            'vignette': self.technique_vignette,
+            'ascii_art': self.technique_ascii_art,
+            'vhs_effect': self.technique_vhs_effect,
+            'pointillism': self.technique_pointillism,
+            'security_camera': self.technique_security_camera,
+            'film_burn': self.technique_film_burn,
+            'embroidery': self.technique_embroidery,
+            'edge_detection': self.technique_edge_detection
         }
         
         if technique_name in technique_methods:
@@ -222,7 +485,7 @@ class ImageProcessor:
     
     def process_single_image(self, image_path):
         """
-        Apply all 15 techniques to a single image.
+        Apply all 22 techniques to a single image.
         
         Args:
             image_path (Path): Path to input image
@@ -310,3 +573,37 @@ class ImageProcessor:
             print(f"  ✓ Created {len(techniques_to_apply) + 1} versions of {image_path.name}")
         
         return success_count, total_images, stats
+
+
+# Example usage demonstration
+if __name__ == "__main__":
+    # Create an instance of the ImageProcessor
+    processor = ImageProcessor(input_dir="images", output_dir="processed")
+    
+    # Process all images with all techniques
+    success, total, stats = processor.process_all_images()
+    
+    # Print summary
+    print("\n" + "="*60)
+    print("PROCESSING COMPLETE")
+    print("="*60)
+    print(f"Successfully processed: {success}/{total} images")
+    print(f"Total files created: {stats['files_created']}")
+    print(f"Techniques available: {stats['total_techniques']}")
+    
+    # Show available techniques
+    print("\nAvailable techniques:")
+    for i, (key, name) in enumerate(processor.techniques.items(), 1):
+        print(f"{i:2d}. {name} ({key})")
+    
+    # Test a single technique on an example image
+    print("\nTesting new techniques on sample image:")
+    sample_image = np.ones((300, 300, 3), dtype=np.uint8) * 128
+    
+    # Test ASCII Art effect
+    ascii_result = processor.technique_ascii_art(sample_image)
+    print(f"ASCII Art effect created: {ascii_result.shape}")
+    
+    # Test VHS effect
+    vhs_result = processor.technique_vhs_effect(sample_image)
+    print(f"VHS effect created: {vhs_result.shape}")

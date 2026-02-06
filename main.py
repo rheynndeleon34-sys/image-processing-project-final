@@ -8,16 +8,16 @@ def display_banner():
     """Display enhanced program banner"""
     banner = """
     ===================================================
-                IMAGE PROCESSING PIPELINE
+            ADVANCED IMAGE PROCESSING PIPELINE
     ===================================================
     """
     print(banner)
 
 def display_all_techniques():
-    """Display all 15 implemented techniques"""
+    """Display all 22 implemented techniques"""
     categories = {
         "Basic Techniques": [
-            ("1", "Grayscale Conversion", "Convert to black and white"),
+            ("1", "Grayscale", "Convert to black and white"),
             ("2", "Canny Edge Detection", "Detect edges with Canny algorithm"),
             ("3", "Color Inversion", "Create negative image"),
             ("4", "Gaussian Blur", "Apply smooth blur"),
@@ -34,10 +34,19 @@ def display_all_techniques():
             ("13", "HDR Effect", "High dynamic range enhancement"),
             ("14", "Watercolor", "Watercolor painting effect"),
             ("15", "Vignette", "Darkened corners effect")
+        ],
+        "Artistic Effects": [
+            ("16", "ASCII Art", "Text-based retro effect"),
+            ("17", "VHS Effect", "Analog tape degradation"),
+            ("18", "Pointillism", "Classic painting technique"),
+            ("19", "Security Camera", "Surveillance camera effect"),
+            ("20", "Film Burn", "Cinematic light leak effect"),
+            ("21", "Embroidery", "Stitching pattern effect"),
+            ("22", "Enhanced Edge Detection", "Combined edge methods")
         ]
     }
     
-    print("IMPLEMENTED TECHNIQUES (15 Total):")
+    print("IMPLEMENTED TECHNIQUES (22 Total):")
     print("=" * 70)
     
     for category, techniques in categories.items():
@@ -58,9 +67,10 @@ def display_usage():
     print("  python main.py --techniques grayscale,canny,sepia  # Specific techniques")
     print("\nOPTIONS:")
     print("  --techniques TECH1,TECH2,...  Apply only specified techniques")
-    print("  --all                         Apply all 15 techniques (default)")
+    print("  --all                         Apply all 22 techniques (default)")
     print("  --basic                       Apply only basic techniques (1-10)")
     print("  --advanced                    Apply only advanced techniques (11-15)")
+    print("  --artistic                    Apply only artistic effects (16-22)")
 
 def parse_arguments():
     """Parse command line arguments"""
@@ -94,6 +104,13 @@ def parse_arguments():
         elif arg == '--advanced':
             args['techniques'] = [
                 'oil_painting', 'cartoon', 'hdr', 'watercolor', 'vignette'
+            ]
+            i += 1
+        
+        elif arg == '--artistic':
+            args['techniques'] = [
+                'ascii_art', 'vhs_effect', 'pointillism', 'security_camera',
+                'film_burn', 'embroidery', 'edge_detection'
             ]
             i += 1
         
@@ -139,7 +156,7 @@ def main():
         if len(args['techniques']) <= 10:
             print(f"                    {', '.join(args['techniques'])}")
     else:
-        print(f"  Techniques:       All 15 techniques")
+        print(f"  Techniques:       All 22 techniques")
     
     print()
     
