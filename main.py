@@ -18,11 +18,11 @@ def display_all_techniques():
     categories = {
         "Basic Techniques": [
             ("1", "Canny Edge Detection", "Detect edges with Canny algorithm"),
-            ("2", "Color Inversion", "Create negative image"),
+            ("2", "Anime Animation Style", "Transform into anime/cartoon characters"),
             ("3", "Sepia Tone", "Vintage brown filter"),
             ("4", "Pencil Sketch", "Convert to pencil drawing"),
             ("5", "Image Sharpening", "Enhance details"),
-            ("6", "Brightness/Contrast", "Adjust light levels"),
+            ("6", "Enhanced Edge Detection", "Multi-method edge detection"),
             ("7", "Binary Threshold", "Pure black and white"),
             ("8", "Emboss Effect", "3D relief effect")
         ],
@@ -101,8 +101,8 @@ def parse_arguments():
         
         elif arg == '--basic':
             args['techniques'] = [
-                'canny_edge', 'color_invert', 'sepia_tone', 'pencil_sketch',
-                'sharpen', 'brightness_contrast', 'binary_threshold', 'emboss'
+                'canny_edge', 'anime_style', 'sepia_tone', 'pencil_sketch',
+                'sharpen', 'edge_detection', 'binary_threshold', 'emboss'
             ]
             i += 1
         
