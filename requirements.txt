@@ -1,0 +1,7 @@
+# Image Processing Dependencies
+# Required packages for the project
+
+opencv-python==4.8.1.78  # OpenCV for image processing
+numpy==1.24.3           # Numerical operations
+matplotlib==3.7.1     # For creating comparison plots
+Pillow==10.0.0        # Alternative image library
