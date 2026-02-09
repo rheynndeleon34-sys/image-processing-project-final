@@ -1,11 +1,10 @@
-# tests/test_artistic_effects.py
-
 import sys
 from pathlib import Path
-import pytest
+import pytest  # pyright: ignore[reportMissingImports]
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from src.image_processor import ImageProcessor
+
 
 @pytest.fixture
 def processor():
@@ -15,22 +14,37 @@ def processor():
     output_dir.mkdir(exist_ok=True)
     return ImageProcessor(input_dir, output_dir)
 
-def test_oil_painting(processor):
-    success_count, _, _ = processor.process_all_images(['oil_painting'])
-    assert success_count > 0
 
-def test_cartoon(processor):
-    success_count, _, _ = processor.process_all_images(['cartoon'])
-    assert success_count > 0
+def test_movie_poster(processor):
+    success, _, _ = processor.process_all_images(["movie_poster"])
+    assert success > 0
 
-def test_hdr(processor):
-    success_count, _, _ = processor.process_all_images(['hdr'])
-    assert success_count > 0
 
-def test_watercolor(processor):
-    success_count, _, _ = processor.process_all_images(['watercolor'])
-    assert success_count > 0
+def test_album_cover(processor):
+    success, _, _ = processor.process_all_images(["album_cover"])
+    assert success > 0
 
-def test_vignette(processor):
-    success_count, _, _ = processor.process_all_images(['vignette'])
-    assert success_count > 0
+
+def test_vhs_effect(processor):
+    success, _, _ = processor.process_all_images(["vhs_effect"])
+    assert success > 0
+
+
+def test_pointillism(processor):
+    success, _, _ = processor.process_all_images(["pointillism"])
+    assert success > 0
+
+
+def test_security_camera(processor):
+    success, _, _ = processor.process_all_images(["security_camera"])
+    assert success > 0
+
+
+def test_film_burn(processor):
+    success, _, _ = processor.process_all_images(["film_burn"])
+    assert success > 0
+
+
+def test_embroidery(processor):
+    success, _, _ = processor.process_all_images(["embroidery"])
+    assert success > 0
