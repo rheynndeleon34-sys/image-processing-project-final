@@ -5,7 +5,7 @@
 A Python-based image processing system implementing various computer vision techniques using a modular and test-driven approach, supported by automated testing and systematic documentation.
 
 ## Project Flow & Process
-```markdown
+
 1. Planning & Architecture Design
    ↓
 2. Implementation of Core Algorithms (src/)
@@ -15,7 +15,7 @@ A Python-based image processing system implementing various computer vision tech
 4. CI/CD Pipeline Setup (.github/workflows/)
    ↓
 5. Demo Generation & Output Verification
-```
+
 
 ## Automated CI/CD Pipeline
 This project includes a professional GitHub Actions workflow that automatically validates all code changes:
@@ -159,26 +159,24 @@ python -m demo.generate  # If such a module exists
 ```
 
 ## Development Workflow for Team Members
-```markdown
  **1. Before Starting Work**
-	Pull latest changes: `git pull origin main`
-	Activate virtual environment
-	Create a new branch: `git checkout -b feature/your-feature-name`
+	- Pull latest changes: `git pull origin main`
+	- Activate virtual environment
+	- Create a new branch: `git checkout -b feature/your-feature-name`
  **2. Adding New Features**
-	Place source code in `src/` directory
-	Add corresponding tests in `tests/` directory
-	Test locally before committing
+	- Place source code in `src/` directory
+	= Add corresponding tests in `tests/` directory
+	- Test locally before committing
 
  **3. Adding Test Images**
-	Place input images in `input/` directory
-	Supported formats: .jpg, .png, .bmp
-	Add descriptive filenames
+	- Place input images in `input/` directory
+	- Supported formats: .jpg, .png, .bmp
+	- Add descriptive filenames
  **4. Before Committing**
-	Run tests: `pytest tests/`
-	Ensure no broken functionality
-	Update documentation if needed
+	- Run tests: `pytest tests/`
+	- Ensure no broken functionality
+	- Update documentation if needed
  **5. Commit & Push**
-```
 
 ```bash
 git add .
