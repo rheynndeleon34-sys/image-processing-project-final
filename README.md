@@ -238,18 +238,18 @@ git push origin feature/your-feature-name
 Input Image → Preprocessing → Technique Application → Postprocessing → Output Image
 ```
 
-# Key Algorithmic Decisions
-1. Modular Design
+## Key Algorithmic Decisions
+**1. Modular Design**
 - Separated algorithms into distinct modules for maintainability
 - Used object-oriented principles where appropriate
 - Created reusable filter and transformation classes
 
-2. Performance Optimization
+**2. Performance Optimization**
 - Vectorized operations using NumPy arrays
 - Efficient memory management for large images
 - Multi-processing for batch image processing
 
-3. Accuracy & Validation
+**3. Accuracy & Validation**
 - Implemented unit tests for each algorithm
 - Used standard test images for verification
 - Compared results with established libraries
