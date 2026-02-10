@@ -163,6 +163,7 @@ python -m demo.generate  # If such a module exists
 	- Pull latest changes: `git pull origin main`
 	- Activate virtual environment
 	- Create a new branch: `git checkout -b feature/your-feature-name`
+	
  **2. Adding New Features**
 	- Place source code in `src/` directory
 	= Add corresponding tests in `tests/` directory
@@ -172,10 +173,12 @@ python -m demo.generate  # If such a module exists
 	- Place input images in `input/` directory
 	- Supported formats: .jpg, .png, .bmp
 	- Add descriptive filenames
+	
  **4. Before Committing**
 	- Run tests: `pytest tests/`
 	- Ensure no broken functionality
 	- Update documentation if needed
+	
  **5. Commit & Push**
 
 ```bash
