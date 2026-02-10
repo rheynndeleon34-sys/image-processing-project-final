@@ -7,13 +7,19 @@ A Python-based image processing system implementing various computer vision tech
 ## Project Flow & Process
 
 1. Planning & Architecture Design
+
    ↓
 2. Implementation of Core Algorithms (src/)
    ↓
+   
 3. Testing & Validation (tests/)
+ 
    ↓
+   
 4. CI/CD Pipeline Setup (.github/workflows/)
+   
    ↓
+   
 5. Demo Generation & Output Verification
 
 
