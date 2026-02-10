@@ -1,6 +1,6 @@
 #Image Processing
 
-##About 
+#About 
 A Python-based image processing system implementing various computer vision techniques using a modular and test-driven approach, supported by automated testing and systematic documentation.
 
 ##Project Flow & Process
