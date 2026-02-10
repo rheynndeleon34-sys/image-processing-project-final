@@ -5,6 +5,7 @@
 A Python-based image processing system implementing various computer vision techniques using a modular and test-driven approach, supported by automated testing and systematic documentation.
 
 ## Project Flow & Process
+```markdown
 1. Planning & Architecture Design
    ↓
 2. Implementation of Core Algorithms (src/)
@@ -14,6 +15,7 @@ A Python-based image processing system implementing various computer vision tech
 4. CI/CD Pipeline Setup (.github/workflows/)
    ↓
 5. Demo Generation & Output Verification
+```
 
 ## Automated CI/CD Pipeline
 This project includes a professional GitHub Actions workflow that automatically validates all code changes:
@@ -93,8 +95,10 @@ image-processing-project-final/
 
 ## How to Run the Application
 ### Prerequisites
-- Python 3.8 or higher
-- Git (for cloning)
+```markdown
+ Python 3.8 or higher
+ Git (for cloning)
+```
 
 ## Installation Steps
 1. Clone the Repository
@@ -155,6 +159,7 @@ python -m demo.generate  # If such a module exists
 ```
 
 ## Development Workflow for Team Members
+```markdown
  **1. Before Starting Work**
 	Pull latest changes: `git pull origin main`
 	Activate virtual environment
@@ -173,6 +178,8 @@ python -m demo.generate  # If such a module exists
 	Ensure no broken functionality
 	Update documentation if needed
  **5. Commit & Push**
+```
+
 ```bash
 git add .
 git commit -m "Descriptive message about changes"
