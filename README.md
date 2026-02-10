@@ -54,22 +54,23 @@ jobs:
         python main.py --help
         echo "Project verification complete"
 ```
-What this automated pipeline does:
--✅ Automatic Testing: Runs on every push and pull request
--✅ Environment Setup: Creates clean Ubuntu environment with Python 3.10
--✅ Smart Test Detection: Only runs pytest if test files exist
--✅ Dependency Installation: Installs all required packages including OpenCV GUI libraries
--✅ Project Validation: Verifies imports and basic functionality work
 
-# Image Processing Dependencies
+## What this automated pipeline does:
+- ✅ Automatic Testing: Runs on every push and pull request
+- ✅ Environment Setup: Creates clean Ubuntu environment with Python 3.10
+- ✅ Smart Test Detection: Only runs pytest if test files exist
+- ✅ Dependency Installation: Installs all required packages including OpenCV GUI libraries
+- ✅ Project Validation: Verifies imports and basic functionality work
+
+## Image Processing Dependencies
 Required packages for the project:
--opencv-python==4.8.1.78 - OpenCV for image processing
--numpy==1.24.3 - Numerical operations
--matplotlib==3.7.1 - For creating comparison plots
--Pillow==10.0.0 - Alternative image library
--scipy==1.10.1 - For advanced filters (ndimage)
+- opencv-python==4.8.1.78 - OpenCV for image processing
+- numpy==1.24.3 - Numerical operations
+- matplotlib==3.7.1 - For creating comparison plots
+- Pillow==10.0.0 - Alternative image library
+- scipy==1.10.1 - For advanced filters (ndimage)
 
-#Project Structure Implementation
+## Project Structure Implementation
 ```
 image-processing-project-final/
 ├── .github/workflows/
@@ -90,12 +91,12 @@ image-processing-project-final/
 └── README.md
 ```
 
-##How to Run the Application
-##Prerequisites
+## How to Run the Application
+## Prerequisites
 Python 3.8 or higher
 Git (for cloning)
 
-##Installation Steps
+## Installation Steps
 1. Clone the Repository
 ```bash
 git clone https://github.com/rheynndeleon34-sys/image-processing-project-final.git
@@ -118,13 +119,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-##Running the Main Application
-Option 1: Using main.py (Primary method)
+## Running the Main Application
+## Option 1: Using main.py (Primary method)
 ```bash
 python main.py
 ```
 
-##Option 2: Using processor.py (For specific operations)
+## Option 2: Using processor.py (For specific operations)
 ```bash
 python processor.py [arguments]
 ```
@@ -146,14 +147,14 @@ pytest -v tests/
 pytest --cov=src tests/
 ```
 
-#Generating Demo Images
+# Generating Demo Images
 ```bash
 ## Check demo/ directory for existing scripts
 ## or run the demo generation module if available
 python -m demo.generate  # If such a module exists
 ```
 
-##Development Workflow for Team Members
+## Development Workflow for Team Members
 1. Before Starting Work
 	Pull latest changes: `git pull origin main`
 	Activate virtual environment
@@ -178,88 +179,88 @@ git commit -m "Descriptive message about changes"
 git push origin feature/your-feature-name
 ```
 
-##Important Notes for Submission
+## Important Notes for Submission
 
-1. Input/Output Directories
--`input/`: Only for source images (DO NOT commit processed images here)
--`output/`: For final processed results (Commit important results here)
--`demo/`: Auto-generated content (May be excluded from final submission)
+## 1. Input/Output Directories
+- `input/`: Only for source images (DO NOT commit processed images here)
+- `output/`: For final processed results (Commit important results here)
+- `demo/`: Auto-generated content (May be excluded from final submission)
 
-2. File Naming Convention
--Python files: snake_case (e.g., `image_processor.py`)
--Test files: `test_module_name.py`
--Output images: `originalname_technique.ext`
+## 2. File Naming Convention
+- Python files: snake_case (e.g., `image_processor.py`)
+- Test files: `test_module_name.py`
+- Output images: `originalname_technique.ext`
 
-3. Testing Requirements
--All new features must include tests
--Test coverage should be maintained
--CI pipeline must pass before merge
+## 3. Testing Requirements
+- All new features must include tests
+- Test coverage should be maintained
+- CI pipeline must pass before merge
 
-##Image Processing Techniques & Algorithms
-1. Filtering Techniques
--Gaussian Blur: Smoothing using Gaussian kernel convolution
--Median Filter: Noise reduction through median pixel value replacement
--Bilateral Filter: Edge-preserving smoothing
--Custom Kernels: User-defined convolution operations
+## Image Processing Techniques & Algorithms
+## 1. Filtering Techniques
+- Gaussian Blur: Smoothing using Gaussian kernel convolution
+- Median Filter: Noise reduction through median pixel value replacement
+- Bilateral Filter: Edge-preserving smoothing
+- Custom Kernels: User-defined convolution operations
 
-2. Edge Detection Algorithms
--Sobel Operator: Gradient-based edge detection
--Canny Edge Detector: Multi-stage algorithm for optimal edge detection
--Laplacian of Gaussian (LoG): Second derivative edge detection
+## 2. Edge Detection Algorithms
+- Sobel Operator: Gradient-based edge detection
+- Canny Edge Detector: Multi-stage algorithm for optimal edge detection
+- Laplacian of Gaussian (LoG): Second derivative edge detection
 
-3. Transformation Methods
--Geometric Transformations: Rotation, scaling, translation
--Affine Transformations: Linear mapping with preservation of lines and parallelism
--Perspective Transform: Projective geometry transformations
+## 3. Transformation Methods
+- Geometric Transformations: Rotation, scaling, translation
+- Affine Transformations: Linear mapping with preservation of lines and parallelism
+- Perspective Transform: Projective geometry transformations
 
-4. Color Processing
--Color Space Conversions: RGB ↔ HSV ↔ Grayscale
--Histogram Equalization: Contrast enhancement
--Color Channel Manipulation: Individual channel processing
+## 4. Color Processing
+- Color Space Conversions: RGB ↔ HSV ↔ Grayscale
+- Histogram Equalization: Contrast enhancement
+- Color Channel Manipulation: Individual channel processing
 
-5. Feature Detection
--Corner Detection: Harris corner detection algorithm
--Blob Detection: Identifying regions with different properties
--Template Matching: Finding template patterns within images
+## 5. Feature Detection
+- Corner Detection: Harris corner detection algorithm
+- Blob Detection: Identifying regions with different properties
+- Template Matching: Finding template patterns within images
 
-##Algorithm Implementation Details
+## Algorithm Implementation Details
 
-##Core Processing Pipeline
+## Core Processing Pipeline
 ```
 Input Image → Preprocessing → Technique Application → Postprocessing → Output Image
 ```
 
 #Key Algorithmic Decisions
 1. Modular Design
---Separated algorithms into distinct modules for maintainability
---Used object-oriented principles where appropriate
---Created reusable filter and transformation classes
+-- Separated algorithms into distinct modules for maintainability
+-- Used object-oriented principles where appropriate
+-- Created reusable filter and transformation classes
 
 2. Performance Optimization
---Vectorized operations using NumPy arrays
---Efficient memory management for large images
---Multi-processing for batch image processing
+-- Vectorized operations using NumPy arrays
+-- Efficient memory management for large images
+-- Multi-processing for batch image processing
 
 3. Accuracy & Validation
---Implemented unit tests for each algorithm
---Used standard test images for verification
---Compared results with established libraries
+-- Implemented unit tests for each algorithm
+-- Used standard test images for verification
+-- Compared results with established libraries
 
-##Testing Methodology
--Unit Tests: Individual function testing
--Integration Tests: Full pipeline validation
--Visual Verification: Manual inspection of output images
--Automated CI: GitHub Actions for continuous validation
+## Testing Methodology
+- Unit Tests: Individual function testing
+- Integration Tests: Full pipeline validation
+- Visual Verification: Manual inspection of output images
+- Automated CI: GitHub Actions for continuous validation
 
 
-##Key Achievements & Results
+## Key Achievements & Results
 1. Successfully Implemented: Multiple image processing techniques with proper abstraction
 2. Testing Coverage: Comprehensive test suite with automated execution
 3. CI/CD Pipeline: Fully automated testing workflow on GitHub
 4. Demo Generation: Automated creation of demonstration images
 5. Team Collaboration: Effective division of responsibilities with clear role definitions
 
-##Future Enhancements
+## Future Enhancements
 Additional Algorithms: Machine learning-based image processing
 GUI Interface: User-friendly graphical interface for non-technical users
 Real-time Processing: Video stream processing capabilities
