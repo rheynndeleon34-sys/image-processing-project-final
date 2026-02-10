@@ -92,7 +92,7 @@ image-processing-project-final/
 ```
 
 ## How to Run the Application
-## Prerequisites
+### Prerequisites
 - Python 3.8 or higher
 - Git (for cloning)
 
