@@ -181,51 +181,51 @@ git push origin feature/your-feature-name
 
 ## Important Notes for Submission
 
-## 1. Input/Output Directories
+### 1. Input/Output Directories
 - `input/`: Only for source images (DO NOT commit processed images here)
 - `output/`: For final processed results (Commit important results here)
 - `demo/`: Auto-generated content (May be excluded from final submission)
 
-## 2. File Naming Convention
+### 2. File Naming Convention
 - Python files: snake_case (e.g., `image_processor.py`)
 - Test files: `test_module_name.py`
 - Output images: `originalname_technique.ext`
 
-## 3. Testing Requirements
+### 3. Testing Requirements
 - All new features must include tests
 - Test coverage should be maintained
 - CI pipeline must pass before merge
 
 ## Image Processing Techniques & Algorithms
-## 1. Filtering Techniques
+### 1. Filtering Techniques
 - Gaussian Blur: Smoothing using Gaussian kernel convolution
 - Median Filter: Noise reduction through median pixel value replacement
 - Bilateral Filter: Edge-preserving smoothing
 - Custom Kernels: User-defined convolution operations
 
-## 2. Edge Detection Algorithms
+### 2. Edge Detection Algorithms
 - Sobel Operator: Gradient-based edge detection
 - Canny Edge Detector: Multi-stage algorithm for optimal edge detection
 - Laplacian of Gaussian (LoG): Second derivative edge detection
 
-## 3. Transformation Methods
+### 3. Transformation Methods
 - Geometric Transformations: Rotation, scaling, translation
 - Affine Transformations: Linear mapping with preservation of lines and parallelism
 - Perspective Transform: Projective geometry transformations
 
-## 4. Color Processing
+### 4. Color Processing
 - Color Space Conversions: RGB ↔ HSV ↔ Grayscale
 - Histogram Equalization: Contrast enhancement
 - Color Channel Manipulation: Individual channel processing
 
-## 5. Feature Detection
+### 5. Feature Detection
 - Corner Detection: Harris corner detection algorithm
 - Blob Detection: Identifying regions with different properties
 - Template Matching: Finding template patterns within images
 
 ## Algorithm Implementation Details
 
-## Core Processing Pipeline
+### Core Processing Pipeline
 ```
 Input Image → Preprocessing → Technique Application → Postprocessing → Output Image
 ```
