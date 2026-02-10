@@ -1,9 +1,10 @@
-#Image Processing
+# Image Processing
 
-#About 
+
+# About 
 A Python-based image processing system implementing various computer vision techniques using a modular and test-driven approach, supported by automated testing and systematic documentation.
 
-##Project Flow & Process
+## Project Flow & Process
 1. Planning & Architecture Design
    ↓
 2. Implementation of Core Algorithms (src/)
@@ -14,7 +15,7 @@ A Python-based image processing system implementing various computer vision tech
    ↓
 5. Demo Generation & Output Verification
 
-##Automated CI/CD Pipeline
+## Automated CI/CD Pipeline
 This project includes a professional GitHub Actions workflow that automatically validates all code changes:
 
 ```yaml
@@ -60,7 +61,7 @@ What this automated pipeline does:
 -✅ Dependency Installation: Installs all required packages including OpenCV GUI libraries
 -✅ Project Validation: Verifies imports and basic functionality work
 
-#Image Processing Dependencies
+# Image Processing Dependencies
 Required packages for the project:
 -opencv-python==4.8.1.78 - OpenCV for image processing
 -numpy==1.24.3 - Numerical operations
