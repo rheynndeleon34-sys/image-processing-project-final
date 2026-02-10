@@ -5,23 +5,17 @@
 A Python-based image processing system implementing various computer vision techniques using a modular and test-driven approach, supported by automated testing and systematic documentation.
 
 ## Project Flow & Process
-
+```markdown
 1. Planning & Architecture Design
-
    ↓
 2. Implementation of Core Algorithms (src/)
-   ↓
-   
+   ↓ 
 3. Testing & Validation (tests/)
- 
    ↓
-   
-4. CI/CD Pipeline Setup (.github/workflows/)
-   
-   ↓
-   
+4. CI/CD Pipeline Setup (.github/workflows/) 
+   ↓  
 5. Demo Generation & Output Verification
-
+```
 
 ## Automated CI/CD Pipeline
 This project includes a professional GitHub Actions workflow that automatically validates all code changes:
