@@ -120,12 +120,12 @@ pip install -r requirements.txt
 ```
 
 ## Running the Main Application
-## Option 1: Using main.py (Primary method)
+### Option 1: Using main.py (Primary method)
 ```bash
 python main.py
 ```
 
-## Option 2: Using processor.py (For specific operations)
+### Option 2: Using processor.py (For specific operations)
 ```bash
 python processor.py [arguments]
 ```
