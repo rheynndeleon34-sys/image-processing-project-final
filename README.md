@@ -204,32 +204,64 @@ git push origin feature/your-feature-name
 - Test coverage should be maintained
 - CI pipeline must pass before merge
 
-## Image Processing Techniques & Algorithms
-### 1. Filtering Techniques
-- Gaussian Blur: Smoothing using Gaussian kernel convolution
-- Median Filter: Noise reduction through median pixel value replacement
-- Bilateral Filter: Edge-preserving smoothing
-- Custom Kernels: User-defined convolution operations
+## ✨ Features
 
-### 2. Edge Detection Algorithms
-- Sobel Operator: Gradient-based edge detection
-- Canny Edge Detector: Multi-stage algorithm for optimal edge detection
-- Laplacian of Gaussian (LoG): Second derivative edge detection
+### Complete Image Processing Toolkit
 
-### 3. Transformation Methods
-- Geometric Transformations: Rotation, scaling, translation
-- Affine Transformations: Linear mapping with preservation of lines and parallelism
-- Perspective Transform: Projective geometry transformations
+Our system implements **25 distinct image processing techniques** across four categories:
 
-### 4. Color Processing
-- Color Space Conversions: RGB ↔ HSV ↔ Grayscale
-- Histogram Equalization: Contrast enhancement
-- Color Channel Manipulation: Individual channel processing
+<details>
+<summary><b>📋 Basic Techniques (8)</b> - Click to expand</summary>
+<br>
 
-### 5. Feature Detection
-- Corner Detection: Harris corner detection algorithm
-- Blob Detection: Identifying regions with different properties
-- Template Matching: Finding template patterns within images
+- **Canny Edge Detection** - Precision edge finding with hysteresis thresholding
+- **Anime Animation Style** - Transform photos into vibrant anime artwork  
+- **Sepia Tone** - Classic vintage photographic effect
+- **Pencil Sketch** - Realistic graphite drawing simulation
+- **Image Sharpening** - Enhance detail clarity and focus
+- **Enhanced Edge Detection** - Combined Sobel, Laplacian and Canny detectors
+- **Binary Threshold** - Clean black/white segmentation
+- **Emboss Effect** - Raised relief appearance
+
+</details>
+
+<details>
+<summary><b>🎨 Advanced Techniques (5)</b> - Click to expand</summary>
+<br>
+
+- **Oil Painting** - Simulated brush strokes and texture
+- **Cartoon Effect** - Smooth colors with edge emphasis
+- **HDR Effect** - Expanded dynamic range visualization
+- **Watercolor** - Soft, blended painting aesthetic
+- **Vignette** - Graduated fade to corners
+
+</details>
+
+<details>
+<summary><b>✨ Artistic Effects (7)</b> - Click to expand</summary>
+<br>
+
+- **Movie Poster** - Cinema-style typography and composition
+- **Album Cover** - Music industry standard layouts
+- **VHS Effect** - Nostalgic analog video artifacts
+- **Pointillism** - Seurat-inspired dot technique
+- **Security Camera** - Surveillance system simulation
+- **Film Burn** - Analog light leak effects
+- **Embroidery** - Thread stitching visualization
+
+</details>
+
+<details>
+<summary><b>🤖 Computer Vision (5)</b> - Click to expand</summary>
+<br>
+
+- **Panorama Stitching** - Seamless image merging
+- **Background Subtraction** - Foreground isolation
+- **Image Compression** - Quality/artifact simulation
+- **Style Transfer** - Neural artistic adaptation
+- **Optical Flow** - Motion pattern visualization
+
+</details>
 
 ## Algorithm Implementation Details
 
