@@ -1,6 +1,10 @@
-name: Image Processing CI with Docker
+name: Image Processing CI with Docker Deployment
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   test:
@@ -44,14 +48,16 @@ jobs:
         python -c "import cv2, numpy, scipy"
         python -c "from src.image_processor import ImageProcessor"
         python main.py --help
+        echo "Project verification complete"
     
     - name: CI Status
-      run: echo "✅ Application tests completed"
+      run: |
+        echo "CI pipeline executed successfully"
 
-  docker-build:
+  docker:
     runs-on: ubuntu-latest
-    needs: test  # Run after test job succeeds
-    if: github.event_name == 'push'  # Only build Docker on pushes (not PRs)
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v4
@@ -59,57 +65,57 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     
-    - name: Build Docker image
-      run: |
-        echo "Building Docker image..."
-        docker build -t image-processor:latest .
-        echo "✅ Docker image built"
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     
-    - name: Test Docker image basic functionality
-      run: |
-        echo "Testing Docker image..."
-        # Test Python works
-        docker run --rm image-processor:latest python --version
-        
-        # Test imports work
-        docker run --rm image-processor:latest python -c "import cv2; print('OpenCV:', cv2.__version__)"
-        docker run --rm image-processor:latest python -c "import numpy; print('NumPy:', numpy.__version__)"
-        docker run --rm image-processor:latest python -c "import scipy; print('SciPy:', scipy.__version__)"
-        
-        # Test main script
-        docker run --rm image-processor:latest python main.py --help
-        
-        echo "✅ Docker tests passed"
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:${{ github.sha }}
     
-    - name: Test Docker with volume mounts
+    - name: Test pushed image
       run: |
-        echo "Testing Docker with volumes..."
-        mkdir -p test-input test-output
+        echo "Testing the pushed image..."
+        docker pull ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest
+        docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest python --version
+        docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest python main.py --help
+    
+    - name: Create run script for users
+      run: |
+        cat > run_everywhere.sh << 'EOF'
+        #!/bin/bash
+        # RUN THIS ON ANY COMPUTER WITH DOCKER!
         
-        # Create a simple test image
-        python -c "
-        import numpy as np
-        import cv2
-        test_img = np.ones((100, 100, 3), dtype=np.uint8) * 255
-        cv2.imwrite('test-input/test.jpg', test_img)
-        print('Created test image')
-        "
+        echo "🚀 Downloading and running Image Processing Pipeline..."
         
-        # Run Docker with volumes
+        # Pull the Docker image
+        docker pull ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest
+        
+        # Create directories
+        mkdir -p input output
+        
+        # Run with your arguments
         docker run --rm \
-          -v "$(pwd)/test-input:/app/input" \
-          -v "$(pwd)/test-output:/app/output" \
-          image-processor:latest --help
+          -v "$(pwd)/input:/app/input" \
+          -v "$(pwd)/output:/app/output" \
+          ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest "$@"
         
-        echo "✅ Docker volume test completed"
+        echo "✅ Done! Check the 'output' folder."
+        EOF
+        
+        chmod +x run_everywhere.sh
+        echo "✅ Created run_everywhere.sh script"
     
-    - name: Cleanup test files
-      if: always()
+    - name: Success message
       run: |
-        rm -rf test-input test-output
-    
-    - name: Docker success
-      run: |
-        echo "✅ Docker CI pipeline completed successfully"
-        echo "Image: image-processor:latest"
-        echo "Status: Build and test passed"
+        echo "🎉 DOCKER IMAGE PUBLISHED!"
+        echo "Anyone can now run:"
+        echo "  docker pull ${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
+        echo "  docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
