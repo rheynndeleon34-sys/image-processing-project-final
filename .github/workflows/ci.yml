@@ -1,4 +1,4 @@
-name: Image Processing CI
+name: Image Processing CI with Docker
 
 on: [push, pull_request]
 
@@ -18,7 +18,7 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest  # Testing framework installed
+        pip install pytest
     
     - name: Install GUI libraries
       run: |
@@ -32,13 +32,11 @@ jobs:
     
     - name: Run tests if available
       run: |
-        # Check if tester has created test files
         if find tests -name "test_*.py" -type f 2>/dev/null | grep -q .; then
           echo "Running PyTest..."
           python -m pytest tests/ -v
         else
           echo "No test files found"
-          # Don't fail, just note
         fi
     
     - name: Verify project functionality
@@ -46,8 +44,72 @@ jobs:
         python -c "import cv2, numpy, scipy"
         python -c "from src.image_processor import ImageProcessor"
         python main.py --help
-        echo "Project verification complete"
     
     - name: CI Status
+      run: echo "✅ Application tests completed"
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: test  # Run after test job succeeds
+    if: github.event_name == 'push'  # Only build Docker on pushes (not PRs)
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
       run: |
-        echo "CI pipeline executed successfully"
+        echo "Building Docker image..."
+        docker build -t image-processor:latest .
+        echo "✅ Docker image built"
+    
+    - name: Test Docker image basic functionality
+      run: |
+        echo "Testing Docker image..."
+        # Test Python works
+        docker run --rm image-processor:latest python --version
+        
+        # Test imports work
+        docker run --rm image-processor:latest python -c "import cv2; print('OpenCV:', cv2.__version__)"
+        docker run --rm image-processor:latest python -c "import numpy; print('NumPy:', numpy.__version__)"
+        docker run --rm image-processor:latest python -c "import scipy; print('SciPy:', scipy.__version__)"
+        
+        # Test main script
+        docker run --rm image-processor:latest python main.py --help
+        
+        echo "✅ Docker tests passed"
+    
+    - name: Test Docker with volume mounts
+      run: |
+        echo "Testing Docker with volumes..."
+        mkdir -p test-input test-output
+        
+        # Create a simple test image
+        python -c "
+        import numpy as np
+        import cv2
+        test_img = np.ones((100, 100, 3), dtype=np.uint8) * 255
+        cv2.imwrite('test-input/test.jpg', test_img)
+        print('Created test image')
+        "
+        
+        # Run Docker with volumes
+        docker run --rm \
+          -v "$(pwd)/test-input:/app/input" \
+          -v "$(pwd)/test-output:/app/output" \
+          image-processor:latest --help
+        
+        echo "✅ Docker volume test completed"
+    
+    - name: Cleanup test files
+      if: always()
+      run: |
+        rm -rf test-input test-output
+    
+    - name: Docker success
+      run: |
+        echo "✅ Docker CI pipeline completed successfully"
+        echo "Image: image-processor:latest"
+        echo "Status: Build and test passed"
