@@ -1,0 +1,21 @@
+# .dockerignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.env
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.git/
+.github/
+output/
+!output/.gitkeep
+*.log
+*.tmp
