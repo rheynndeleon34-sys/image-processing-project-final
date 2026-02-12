@@ -1,4 +1,4 @@
-name: Image Processing CI with Docker Deployment
+name: CI/CD Pipeline - Image Processing
 
 on:
   push:
@@ -7,9 +7,9 @@ on:
     branches: [main]
 
 jobs:
+  # ============== CI: TESTING ==============
   test:
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v4
     
@@ -30,14 +30,11 @@ jobs:
         sudo apt-get install -y libgl1 libglib2.0-0
     
     - name: Prepare test environment
-      run: |
-        mkdir -p tests
-        echo "Test environment ready"
+      run: mkdir -p tests
     
     - name: Run tests if available
       run: |
         if find tests -name "test_*.py" -type f 2>/dev/null | grep -q .; then
-          echo "Running PyTest..."
           python -m pytest tests/ -v
         else
           echo "No test files found"
@@ -45,15 +42,11 @@ jobs:
     
     - name: Verify project functionality
       run: |
-        python -c "import cv2, numpy, scipy"
-        python -c "from src.image_processor import ImageProcessor"
-        python main.py --help
-        echo "Project verification complete"
-    
-    - name: CI Status
-      run: |
-        echo "CI pipeline executed successfully"
+        python -c "import cv2, numpy, scipy; print('✅ Dependencies OK')"
+        python -c "from src.image_processor import ImageProcessor; print('✅ Project imports OK')"
+        python main.py --help > /dev/null && echo "✅ Application runs"
 
+  # ============== CD: BUILD & PUSH ==============
   docker:
     runs-on: ubuntu-latest
     needs: test
@@ -82,40 +75,63 @@ jobs:
     
     - name: Test pushed image
       run: |
-        echo "Testing the pushed image..."
         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest
         docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest python --version
         docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest python main.py --help
     
-    - name: Create run script for users
+    - name: Create run script
       run: |
-        cat > run_everywhere.sh << 'EOF'
+        cat > run_everywhere.sh << EOF
         #!/bin/bash
-        # RUN THIS ON ANY COMPUTER WITH DOCKER!
-        
-        echo "🚀 Downloading and running Image Processing Pipeline..."
-        
-        # Pull the Docker image
+        echo "🚀 Running Image Processing Pipeline..."
         docker pull ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest
-        
-        # Create directories
         mkdir -p input output
-        
-        # Run with your arguments
         docker run --rm \
-          -v "$(pwd)/input:/app/input" \
-          -v "$(pwd)/output:/app/output" \
-          ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest "$@"
-        
-        echo "✅ Done! Check the 'output' folder."
+          -v "\$(pwd)/input:/app/input" \
+          -v "\$(pwd)/output:/app/output" \
+          ${{ secrets.DOCKERHUB_USERNAME }}/image-processor:latest "\$@"
+        echo "✅ Done! Check output folder."
         EOF
-        
         chmod +x run_everywhere.sh
-        echo "✅ Created run_everywhere.sh script"
     
-    - name: Success message
+    - name: Docker push success
+      run: echo "✅ Docker image published to Docker Hub"
+
+  # ============== CD: DEPLOYMENT STATUS ==============
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: CI/CD Pipeline Complete
       run: |
-        echo "🎉 DOCKER IMAGE PUBLISHED!"
-        echo "Anyone can now run:"
-        echo "  docker pull ${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
-        echo "  docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════╗"
+        echo "║                                                          ║"
+        echo "║     🎉  CI/CD PIPELINE EXECUTED SUCCESSFULLY!  🎉       ║"
+        echo "║                                                          ║"
+        echo "╚══════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "📌 CONTINUOUS INTEGRATION (CI)"
+        echo "   ├── ✅ Code tested: ${{ github.sha }}"
+        echo "   ├── ✅ Dependencies verified"
+        echo "   └── ✅ Application validated"
+        echo ""
+        echo "📌 CONTINUOUS DELIVERY (CD)"
+        echo "   ├── ✅ Docker image built"
+        echo "   ├── ✅ Pushed to Docker Hub"
+        echo "   └── ✅ Ready for deployment"
+        echo ""
+        echo "📦 DEPLOYMENT INFORMATION"
+        echo "   ├── Repository: ${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
+        echo "   ├── Tag: latest, ${{ github.sha }}"
+        echo "   └── URL: https://hub.docker.com/r/${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
+        echo ""
+        echo "🚀 QUICK START FOR USERS"
+        echo "   ──────────────────────"
+        echo "   1. Install Docker"
+        echo "   2. Run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
+        echo "   3. Run: docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/image-processor"
+        echo ""
+        echo "✨ CI/CD COMPLETE - READY FOR PRODUCTION! ✨"
